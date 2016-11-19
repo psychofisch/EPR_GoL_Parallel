@@ -95,11 +95,9 @@ int main(int argc, char* argv[])
 	cl.start();
 
 	if(mode == MODE_SEQ)
-		for (int i = 0; i < cycles; ++i)
-			main_board->cycle_seq();
+		main_board->cycle_seq(cycles);
 	else if(mode == MODE_OMP)
-		for (int i = 0; i < cycles; ++i)
-			main_board->cycle_omp(threads);
+		main_board->cycle_omp(cycles, threads);
 
 	stamps = cl.stop();
 

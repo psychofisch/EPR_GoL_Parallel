@@ -16,38 +16,44 @@ const char_vector * board::getBoard()
 	return &m_elements;
 }
 
-void board::cycle_seq()
+void board::cycle_seq(int cycles)
 {
-	tmp_map = char_vector(m_elements);
-
-	for (int y = 0; y < m_size.y; ++y)
+	for (int i = 0; i < cycles; ++i)
 	{
-		int row = y * m_size.x;
-		for (int x = 0; x < m_size.x; ++x)
-		{
-			i_calc(x, y);
-		}
-	}
+		tmp_map = char_vector(m_elements);
 
-	m_elements = tmp_map;
+		for (int y = 0; y < m_size.y; ++y)
+		{
+			int row = y * m_size.x;
+			for (int x = 0; x < m_size.x; ++x)
+			{
+				i_calc(x, y);
+			}
+		}
+
+		m_elements = tmp_map;
+	}
 }
 
-void board::cycle_omp(int t)
+void board::cycle_omp(int cycles, int t)
 {
-	tmp_map = char_vector(m_elements);
-
-	omp_set_dynamic(0);
-	#pragma omp parallel for num_threads(t)
-	for (int y = 0; y < m_size.y; ++y)
+	for (int i = 0; i < cycles; ++i)
 	{
-		int row = y * m_size.x;
-		for (int x = 0; x < m_size.x; ++x)
-		{
-			i_calc(x, y);
-		}
-	}
+		tmp_map = char_vector(m_elements);
 
-	m_elements = tmp_map;
+		omp_set_dynamic(0);
+#pragma omp parallel for num_threads(t)
+		for (int y = 0; y < m_size.y; ++y)
+		{
+			int row = y * m_size.x;
+			for (int x = 0; x < m_size.x; ++x)
+			{
+				i_calc(x, y);
+			}
+		}
+
+		m_elements = tmp_map;
+	}
 }
 
 size_t board::getSizeX()

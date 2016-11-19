@@ -16,8 +16,8 @@ public:
 	~board();
 
 	const char_vector* getBoard();
-	void cycle_seq();
-	void cycle_omp(int t);
+	void cycle_seq(int cycles);
+	void cycle_omp(int cyccles, int t);
 	size_t getSizeX();
 	size_t getSizeY();
 	char getNeighbour(int x, int y, int number);
