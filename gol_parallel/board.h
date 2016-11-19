@@ -4,7 +4,7 @@
 #include <omp.h>
 #include <vector>
 
-typedef std::vector<std::vector<char>> char_vector;
+typedef std::vector<char> char_vector;
 typedef unsigned int uint;
 
 #include "FileIO.h"

@@ -23,13 +23,13 @@ void board::cycle()
 	/*
 	this for-loop constellation is faster than for(y){for(x)}; i'm not sure why...
 	*/
-	for (int x = 0; x < m_elements[0].size(); ++x)
+	for (int y = 0; y < m_size.y; ++y)
 	{
-		for (int y = 0; y < m_elements.size(); ++y)
+		int row = y * m_size.x;
+		for (int x = 0; x < m_size.x; ++x)
 		{
 			uint alive = 0;
 			char neighbour;
-			char cache[4] = {'?', '?', '?', '?'};
 			int c = 0;
 
 			for (int i = 0; i <= 8; ++i)
@@ -42,7 +42,7 @@ void board::cycle()
 					alive++;
 
 				//optimization
-				if (i == 6 && alive == 0 && m_elements[y][x] == '.')
+				if (i == 6 && alive == 0 && m_elements[row+x] == '.')
 					break;
 
 				if (alive >= 4)
@@ -52,10 +52,10 @@ void board::cycle()
 
 			//std::cout << alive;
 
-			if (m_elements[y][x] == '.' && alive == 3)
-				tmp_map[y][x] = 'x';
-			else if(m_elements[y][x] == 'x' && (alive >= 4 || alive <= 1 ))
-				tmp_map[y][x] = '.';
+			if (m_elements[row + x] == '.' && alive == 3)
+				tmp_map[row + x] = 'x';
+			else if(m_elements[row + x] == 'x' && (alive >= 4 || alive <= 1 ))
+				tmp_map[row + x] = '.';
 		}
 		//std::cout << std::endl;
 	}
@@ -76,7 +76,7 @@ size_t board::getSizeY()
 void board::SaveBoard(const char * path)
 {
 	FileHandler fh;
-	fh.SaveBoard(path, m_elements);
+	fh.SaveBoard(path, m_elements, m_size);
 }
 
 char board::getNeighbour(int x, int y, int number)
@@ -106,14 +106,14 @@ char board::getNeighbour(int x, int y, int number)
 	}
 
 	if (x < 0)
-		x +=  m_elements[0].size();
-	else if (x >= m_elements[0].size())
+		x +=  m_size.x;
+	else if (x >= m_size.x)
 		x = 0;
 
 	if (y < 0)
-		y += m_elements.size();
-	else if (y >= m_elements.size())
+		y += m_size.y;
+	else if (y >= m_size.y)
 		y = 0;
 
-	return m_elements[y][x];
+	return m_elements[(y*m_size.x) + x];
 }

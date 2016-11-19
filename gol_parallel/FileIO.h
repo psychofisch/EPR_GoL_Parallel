@@ -18,7 +18,7 @@ public:
 	~FileHandler();
 
 	void LoadBoardFromFile(const char* path, char_vector& map, size& size);
-	void SaveBoard(const char* path, char_vector& map);
+	void SaveBoard(const char* path, char_vector& map, size s);
 	void SaveText(const char*);
 	std::string LoadText(const char*);
 };

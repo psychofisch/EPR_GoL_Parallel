@@ -27,12 +27,7 @@ void FileHandler::LoadBoardFromFile(const char* path, char_vector& map, size& si
 	size.x = x;
 	size.y = y;
 
-	map.resize(size.y);
-
-	for (uint i = 0; i < map.size(); ++i)
-	{
-		map[i].resize(size.x);
-	}
+	map.resize(size.y * size.x);
 
 	uint county = 0;
 	do {
@@ -40,7 +35,7 @@ void FileHandler::LoadBoardFromFile(const char* path, char_vector& map, size& si
 		
 		for (uint x = 0; x < tmp.size(); ++x)
 		{
-			map[county][x] = tmp[x];
+			map[(county*size.x) + x] = tmp[x];
 		}
 		county++;
 	} while (!file.eof());
@@ -48,7 +43,7 @@ void FileHandler::LoadBoardFromFile(const char* path, char_vector& map, size& si
 	file.close();
 }
 
-void FileHandler::SaveBoard(const char * path, char_vector & map)
+void FileHandler::SaveBoard(const char * path, char_vector & map, size s)
 {
 	std::ofstream file;
 	file.open(path);
@@ -59,16 +54,16 @@ void FileHandler::SaveBoard(const char * path, char_vector & map)
 		return;
 	}
 
-	file << map[0].size() << "," << map.size() << std::endl;
+	file << s.x << "," << s.y << std::endl;
 
 	std::string line = "";
 	
-	for (uint y = 0; y < map.size(); ++y)
+	for (uint y = 0; y < s.y; ++y)
 	{
 		line = "";
-		for (uint x = 0; x < map[y].size(); ++x)
+		for (uint x = 0; x < s.x; ++x)
 		{
-			file << map[y][x];
+			file << map[(y*s.x)+x];
 		}
 		file << std::endl;
 	}
