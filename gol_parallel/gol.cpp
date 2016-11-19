@@ -4,14 +4,18 @@
 #include "board.h"
 #include "stopwatch.h"
 
+enum Mode { MODE_SEQ, MODE_OMP, MODE_OCL };
+
 int main(int argc, char* argv[])
 {
 	stopwatch cl;
 
 	std::string path_in = "", path_out = "";
-	int cycles = 1;
+	int cycles = 1,
+		threads = 4;
 	bool measure = false;
 	bool debug = false;
+	Mode mode = MODE_SEQ;
 	
 	for (int i = 1; i < argc; ++i)
 	{
@@ -39,10 +43,23 @@ int main(int argc, char* argv[])
 			if (debug)
 				std::cout << "measuring " << ((measure) ? "ENABLED" : "DISABLED") << std::endl;
 		}
-		else if(strcmp(argv[i], "--debug") == 0)
+		else if(strcmp(argv[i], "--mode") == 0)
+		{
+			if (strcmp(argv[++i], "omp") == 0)
+				mode = MODE_OMP;
+			else if (strcmp(argv[++i], "ocl") == 0)
+				mode = MODE_OCL;
+		}
+		else if (strcmp(argv[i], "--threads") == 0)
+		{
+			threads = atoi(argv[++i]);
+			if (debug)
+				std::cout << "number of threads: " << threads << std::endl;
+		}
+		else if (strcmp(argv[i], "--debug") == 0)
 		{
 			debug = true;
-			std::cout << "DEBUG MODE ACTIVATED"  << std::endl;
+			std::cout << "DEBUG MODE ACTIVATED" << std::endl;
 		}
 	}
 
@@ -50,6 +67,17 @@ int main(int argc, char* argv[])
 	{
 		std::cout << "no " << ((path_in == "") ? "in" : "out") << "put file specified -> exiting...\n";
 		exit(1);
+	}
+
+	if (debug)
+	{
+		if (mode == MODE_SEQ)
+			std::cout << "SEQUENTIAL";
+		else if (mode == MODE_OMP)
+			std::cout << "OpenMP";
+		else if (mode == MODE_OCL)
+			std::cout << "OpenCL";
+		std::cout << " mode selected" << std::endl;
 	}
 
 	//LOADING
@@ -66,10 +94,12 @@ int main(int argc, char* argv[])
 	//CYCLING
 	cl.start();
 
-	for (int i = 0; i < cycles; ++i)
-	{
-		main_board->cycle();
-	}
+	if(mode == MODE_SEQ)
+		for (int i = 0; i < cycles; ++i)
+			main_board->cycle_seq();
+	else if(mode == MODE_OMP)
+		for (int i = 0; i < cycles; ++i)
+			main_board->cycle_omp(threads);
 
 	stamps = cl.stop();
 

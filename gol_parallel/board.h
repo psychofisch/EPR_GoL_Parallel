@@ -1,5 +1,4 @@
 #pragma once
-#pragma omp parallel
 
 #include <omp.h>
 #include <vector>
@@ -17,7 +16,8 @@ public:
 	~board();
 
 	const char_vector* getBoard();
-	void cycle();
+	void cycle_seq();
+	void cycle_omp(int t);
 	size_t getSizeX();
 	size_t getSizeY();
 	char getNeighbour(int x, int y, int number);
@@ -26,5 +26,7 @@ private:
 	size m_size;
 	char_vector m_elements;
 	char_vector tmp_map;
+
+	void i_calc(int x, int y);
 };
 
