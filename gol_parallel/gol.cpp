@@ -12,7 +12,9 @@ int main(int argc, char* argv[])
 
 	std::string path_in = "", path_out = "";
 	int cycles = 1,
-		threads = 4;
+		threads = 4,
+		platformId = -1,
+		deviceId = -1;
 	bool measure = false;
 	bool debug = false;
 	Mode mode = MODE_SEQ;
@@ -45,9 +47,10 @@ int main(int argc, char* argv[])
 		}
 		else if(strcmp(argv[i], "--mode") == 0)
 		{
-			if (strcmp(argv[++i], "omp") == 0)
+			++i;
+			if (strcmp(argv[i], "omp") == 0)
 				mode = MODE_OMP;
-			else if (strcmp(argv[++i], "ocl") == 0)
+			else if (strcmp(argv[i], "ocl") == 0)
 				mode = MODE_OCL;
 		}
 		else if (strcmp(argv[i], "--threads") == 0)
@@ -94,10 +97,12 @@ int main(int argc, char* argv[])
 	//CYCLING
 	cl.start();
 
-	if(mode == MODE_SEQ)
+	if (mode == MODE_SEQ)
 		main_board->cycle_seq(cycles);
-	else if(mode == MODE_OMP)
+	else if (mode == MODE_OMP)
 		main_board->cycle_omp(cycles, threads);
+	else if (mode == MODE_OCL)
+		main_board->cycle_ocl(cycles, platformId, deviceId);
 
 	stamps = cl.stop();
 

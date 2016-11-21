@@ -1,5 +1,6 @@
 #pragma once
 
+#include <CL\cl.hpp>
 #include <omp.h>
 #include <vector>
 
@@ -18,6 +19,7 @@ public:
 	const char_vector* getBoard();
 	void cycle_seq(int cycles);
 	void cycle_omp(int cyccles, int t);
+	void cycle_ocl(int cycles, int platformId, int deviceId);
 	size_t getSizeX();
 	size_t getSizeY();
 	char getNeighbour(int x, int y, int number);
