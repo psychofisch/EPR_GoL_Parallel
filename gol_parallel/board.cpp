@@ -18,9 +18,10 @@ const char_vector * board::getBoard()
 
 void board::cycle_seq(int cycles)
 {
+	tmp_map.resize(m_elements.size());
 	for (int i = 0; i < cycles; ++i)
 	{
-		tmp_map = char_vector(m_elements);
+		//tmp_map = char_vector(m_elements);
 
 		for (int y = 0; y < m_size.y; ++y)
 		{
@@ -36,9 +37,10 @@ void board::cycle_seq(int cycles)
 
 void board::cycle_omp(int cycles, int t)
 {
+	tmp_map.resize(m_elements.size());
 	for (int i = 0; i < cycles; ++i)
 	{
-		tmp_map = char_vector(m_elements);
+		//tmp_map = char_vector(m_elements);
 
 		omp_set_dynamic(0);
 		#pragma omp parallel for num_threads(t)
@@ -220,6 +222,8 @@ void board::i_calc(int x, int y)
 		tmp_map[pos] = 'x';
 	else if (m_elements[pos] == 'x' && (alive >= 4 || alive <= 1))
 		tmp_map[pos] = '.';
+	else
+		tmp_map[pos] = m_elements[pos];
 }
 
 char board::getNeighbour(int x, int y, int number)
