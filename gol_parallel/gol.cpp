@@ -59,6 +59,18 @@ int main(int argc, char* argv[])
 			if (debug)
 				std::cout << "number of threads: " << threads << std::endl;
 		}
+		else if (strcmp(argv[i], "--platformId") == 0)
+		{
+			platformId = atoi(argv[++i]);
+			if (debug)
+				std::cout << "platformId: " << platformId << std::endl;
+		}
+		else if (strcmp(argv[i], "--deviceId") == 0)
+		{
+			deviceId = atoi(argv[++i]);
+			if (debug)
+				std::cout << "deviceId: " << deviceId << std::endl;
+		}
 		else if (strcmp(argv[i], "--debug") == 0)
 		{
 			debug = true;
