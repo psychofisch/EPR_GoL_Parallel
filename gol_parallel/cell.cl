@@ -34,7 +34,7 @@ char getNeighbour(int x, int y, int size_x, int size_y, int number, __global cha
 	else if (y >= size_y)
 		y = 0;
 
-	return elements[(y*size_x) + x];
+	return elements[(y * size_x) + x];
 }
 
 __kernel void cell(
@@ -45,12 +45,13 @@ __kernel void cell(
 {
 	int tidX = get_global_id(0);
 	int tidY = get_global_id(1);
+	int alive;
+	char neighbour;
 
 	if (tidX < size_x && tidY < size_y)
 	{
 		int pos = (tidY * size_x) + tidX;
-		int alive = 0;
-		char neighbour;
+		alive = 0;
 
 		for (int i = 0; i <= 8; ++i)
 		{
@@ -59,14 +60,14 @@ __kernel void cell(
 
 			neighbour = getNeighbour(tidX, tidY, size_x, size_y, i, elements);
 			if (neighbour == 'x')
-				alive++;
+				++alive;
 
 			//optimization
 			//if (i == 6 && alive == 0 && elements[pos] == '.')
 			//	break;
 
-			/*if (alive >= 4)
-				break;*/
+			//if (alive >= 4)
+			//	break;
 			//***
 		}
 

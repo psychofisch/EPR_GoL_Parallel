@@ -94,7 +94,16 @@ void board::cycle_ocl(int cycles, int platformId, int deviceId)
 	program = cl::Program(context, source);
 
 	//try {
-		program.build(devices);
+	err = program.build(devices);
+	if (err != ERROR_SUCCESS)
+	{
+		std::string s;
+		program.getBuildInfo(devices[0], CL_PROGRAM_BUILD_LOG, &s);
+		std::cout << s << std::endl;
+		program.getBuildInfo(devices[0], CL_PROGRAM_BUILD_OPTIONS, &s);
+		std::cout << s << std::endl;
+	}
+	handle_clerror(err);
 	//}
 	//catch (cl::Error err) {
 	//	// error handling
