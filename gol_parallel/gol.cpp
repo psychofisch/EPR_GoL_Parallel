@@ -1,6 +1,10 @@
 // gol.cpp : Defines the entry point for the console application.
 //
 
+#define DEBUG(x) std::cout << #x << ": " << x << std::endl;
+
+#include <limits>
+
 #include "board.h"
 #include "stopwatch.h"
 
@@ -17,7 +21,9 @@ int main(int argc, char* argv[])
 		deviceId = -1;
 	bool measure = false;
 	bool debug = false;
+	bool fulltime = false;
 	Mode mode = MODE_SEQ;
+	board::OCLMODE ocl_mode = board::OCL_ALL;
 	
 	for (int i = 1; i < argc; ++i)
 	{
@@ -25,25 +31,31 @@ int main(int argc, char* argv[])
 		{
 			path_in = argv[++i];
 			if(debug)
-				std::cout << "input file: " << path_in << std::endl;
+				DEBUG(path_in);
 		}
 		else if (strcmp(argv[i], "--generations") == 0)
 		{
 			cycles = atoi(argv[++i]);
 			if (debug)
-				std::cout << "generations: " << cycles << std::endl;
+				DEBUG(cycles);
 		}
 		else if (strcmp(argv[i], "--save") == 0)
 		{
 			path_out = argv[++i];
 			if (debug)
-				std::cout << "output file: " << path_out << std::endl;
+				DEBUG(path_out);
 		}
 		else if (strcmp(argv[i], "--measure") == 0)
 		{
 			measure = true;
 			if (debug)
 				std::cout << "measuring " << ((measure) ? "ENABLED" : "DISABLED") << std::endl;
+		}
+		else if (strcmp(argv[i], "--fulltime") == 0)
+		{
+			fulltime = true;
+			if (debug)
+				std::cout << "measuring " << ((fulltime) ? "ENABLED" : "DISABLED") << std::endl;
 		}
 		else if(strcmp(argv[i], "--mode") == 0)
 		{
@@ -57,19 +69,27 @@ int main(int argc, char* argv[])
 		{
 			threads = atoi(argv[++i]);
 			if (debug)
-				std::cout << "number of threads: " << threads << std::endl;
+				DEBUG(threads);
+		}
+		else if (strcmp(argv[i], "--device") == 0)
+		{
+			++i;
+			if (strcmp(argv[i], "cpu") == 0)
+				ocl_mode = board::OCL_CPU;
+			else if (strcmp(argv[i], "gpu") == 0)
+				ocl_mode = board::OCL_GPU;
 		}
 		else if (strcmp(argv[i], "--platformId") == 0)
 		{
 			platformId = atoi(argv[++i]);
 			if (debug)
-				std::cout << "platformId: " << platformId << std::endl;
+				DEBUG(platformId);
 		}
 		else if (strcmp(argv[i], "--deviceId") == 0)
 		{
 			deviceId = atoi(argv[++i]);
 			if (debug)
-				std::cout << "deviceId: " << deviceId << std::endl;
+				DEBUG(deviceId);
 		}
 		else if (strcmp(argv[i], "--debug") == 0)
 		{
@@ -100,6 +120,8 @@ int main(int argc, char* argv[])
 	cl.start();
 
 	board* main_board = new board(path_in.c_str());
+	if (debug)
+		main_board->setDebug(debug);
 
 	stamps = cl.stop();
 
@@ -113,8 +135,10 @@ int main(int argc, char* argv[])
 		main_board->cycle_seq(cycles);
 	else if (mode == MODE_OMP)
 		main_board->cycle_omp(cycles, threads);
-	else if (mode == MODE_OCL)
-		main_board->cycle_ocl(cycles, platformId, deviceId);
+	else if (mode == MODE_OCL && ocl_mode == board::OCL_ALL)
+		main_board->cycle_ocl(cycles, ocl_mode, platformId, deviceId);
+	else if (mode == MODE_OCL && ocl_mode != board::OCL_ALL)
+		main_board->cycle_ocl(cycles, ocl_mode, 0, 0);
 
 	stamps = cl.stop();
 
@@ -138,9 +162,15 @@ int main(int argc, char* argv[])
 	}
 	else
 	{
-		std::cout << cl.getDurationString(0) << "; " << cl.getDurationString(1) << "; " << cl.getDurationString(2) << ";\n";
+		std::cout.precision(3);
+		std::cout.fill('0');
+		if(fulltime)
+			std::cout << std::fixed << cl.getFullDuration() << ";\n";
+		else
+			std::cout << cl.getDurationString(0) << "; " << cl.getDurationString(1) << "; " << cl.getDurationString(2) << ";\n";
 	}
-	std::cin.ignore();
+	if(debug)
+		std::cin.ignore();
 	return 0;
 }
 

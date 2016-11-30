@@ -1,26 +1,27 @@
-char getNeighbour(int x, int y, int size_x, int size_y, int number, __global char* elements)
+char getNeighbour(int x, int y, int size_x, int size_y, int number, __global char* map)
 {
 	switch (number)
 	{
 	case 0: x -= 1;
-			y -= 1;
+		y -= 1;
 		break;
 	case 1: x -= 1;
 		break;
 	case 2: x -= 1;
-			y += 1;
+		y += 1;
 		break;
 	case 3: y -= 1;
 		break;
+	case 4: return '.'; //i only count living cells
 	case 5: y += 1;
 		break;
 	case 6: x += 1;
-			y -= 1;
+		y -= 1;
 		break;
 	case 7: x += 1;
 		break;
 	case 8: x += 1;
-			y += 1;
+		y += 1;
 		break;
 	}
 
@@ -34,7 +35,7 @@ char getNeighbour(int x, int y, int size_x, int size_y, int number, __global cha
 	else if (y >= size_y)
 		y = 0;
 
-	return elements[(y * size_x) + x];
+	return map[(y * size_x) + x];
 }
 
 __kernel void cell(
@@ -55,9 +56,6 @@ __kernel void cell(
 
 		for (int i = 0; i <= 8; ++i)
 		{
-			if (i == 4)	//you are not your own neighbour
-				continue;
-
 			neighbour = getNeighbour(tidX, tidY, size_x, size_y, i, elements);
 			if (neighbour == 'x')
 				++alive;

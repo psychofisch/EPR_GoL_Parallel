@@ -1,6 +1,7 @@
 #include "board.h"
 
 board::board(const char* path)
+	:m_debug(false)
 {
 	FileHandler fh;
 	fh.LoadBoardFromFile(path, m_elements, m_size);
@@ -56,7 +57,7 @@ void board::cycle_omp(int cycles, int t)
 	}
 }
 
-void board::cycle_ocl(int cycles, int platformId, int deviceId)
+void board::cycle_ocl(int cycles, OCLMODE mode, int platformId, int deviceId)
 {
 	const std::string KERNEL_FILE = "cell.cl";
 	cl_int err = CL_SUCCESS;
@@ -76,9 +77,22 @@ void board::cycle_ocl(int cycles, int platformId, int deviceId)
 	// create a context and get available devices
 	cl::Platform platform = platforms[platformId]; // on a different machine, you may have to select a different platform
 	cl_context_properties properties[] = { CL_CONTEXT_PLATFORM, (cl_context_properties)(platform)(), 0 };
-	cl::Context context(CL_DEVICE_TYPE_ALL, properties);
+	cl::Context context;
+	
+	if (mode == OCL_ALL)
+		context = cl::Context(CL_DEVICE_TYPE_ALL, properties);
+	else if(mode == OCL_CPU)
+		context = cl::Context(CL_DEVICE_TYPE_CPU, properties);
+	else if (mode == OCL_GPU)
+		context = cl::Context(CL_DEVICE_TYPE_GPU, properties);
 
 	devices = context.getInfo<CL_CONTEXT_DEVICES>();
+
+	char deviceName[255];
+	err = devices[deviceId].getInfo(CL_DEVICE_NAME, &deviceName);
+	handle_clerror(err);
+	if(m_debug)
+		std::cout << deviceName << std::endl;
 
 	// load and build the kernel
 	std::ifstream sourceFile(KERNEL_FILE);
@@ -169,7 +183,8 @@ void board::cycle_ocl(int cycles, int platformId, int deviceId)
 		}
 	}
 
-	std::cout << "threads|real size -> " << globalSize.x << ":" << m_size.x << "|" << globalSize.y << ":" << m_size.y << std::endl;
+	if(m_debug)
+		std::cout << "threads|real size -> " << globalSize.x << ":" << m_size.x << "|" << globalSize.y << ":" << m_size.y << std::endl;
 
 	cl::NDRange global(globalSize.x, globalSize.y);
 	cl::NDRange local(16, 16); //make sure local range is divisible by global range
@@ -203,6 +218,11 @@ void board::SaveBoard(const char * path)
 	fh.SaveBoard(path, m_elements, m_size);
 }
 
+void board::setDebug(bool d)
+{
+	m_debug = d;
+}
+
 void board::i_calc(int x, int y)
 {
 	int pos = y * m_size.x + x;
@@ -211,9 +231,6 @@ void board::i_calc(int x, int y)
 
 	for (int i = 0; i <= 8; ++i)
 	{
-		if (i == 4)	//you are not your own neighbour
-			continue;
-
 		neighbour = getNeighbour(x, y, i);
 		if (neighbour == 'x')
 			alive++;
@@ -235,7 +252,7 @@ void board::i_calc(int x, int y)
 		tmp_map[pos] = m_elements[pos];
 }
 
-char board::getNeighbour(int x, int y, int number)
+char board::getNeighbour(int x, int y, int& number)
 {
 	switch (number)
 	{
@@ -249,6 +266,7 @@ char board::getNeighbour(int x, int y, int number)
 		break;
 	case 3: y -= 1;
 		break;
+	case 4: return '.';
 	case 5: y += 1;
 		break;
 	case 6: x += 1;
@@ -262,7 +280,7 @@ char board::getNeighbour(int x, int y, int number)
 	}
 
 	if (x < 0)
-		x +=  m_size.x;
+		x += m_size.x;
 	else if (x >= m_size.x)
 		x = 0;
 
