@@ -88,6 +88,27 @@ void board::cycle_ocl(int cycles, OCLMODE mode, int platformId, int deviceId)
 
 	devices = context.getInfo<CL_CONTEXT_DEVICES>();
 
+	if (devices.size() == 0 && platforms.size() != 0)
+	{
+		platform = platforms[platformId + 1];
+		cl_context_properties properties[] = { CL_CONTEXT_PLATFORM, (cl_context_properties)(platform)(), 0 };
+
+		if (mode == OCL_ALL)
+			context = cl::Context(CL_DEVICE_TYPE_ALL, properties);
+		else if (mode == OCL_CPU)
+			context = cl::Context(CL_DEVICE_TYPE_CPU, properties);
+		else if (mode == OCL_GPU)
+			context = cl::Context(CL_DEVICE_TYPE_GPU, properties);
+
+		devices = context.getInfo<CL_CONTEXT_DEVICES>();
+
+		if (devices.size() == 0)
+		{
+			std::cout << "no available devices found\n";
+			exit(666);
+		}
+	}
+
 	char deviceName[255];
 	err = devices[deviceId].getInfo(CL_DEVICE_NAME, &deviceName);
 	handle_clerror(err);
