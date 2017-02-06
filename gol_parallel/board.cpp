@@ -76,6 +76,7 @@ void board::cycle_ocl(int cycles, OCLMODE mode, int platformId, int deviceId)
 
 	// create a context and get available devices
 	cl::Platform platform = platforms[platformId]; // on a different machine, you may have to select a different platform
+	std::cout << "Platform Name: " << platform.getInfo<CL_PLATFORM_NAME>() << std::endl;
 	cl_context_properties properties[] = { CL_CONTEXT_PLATFORM, (cl_context_properties)(platform)(), 0 };
 	cl::Context context;
 	
@@ -252,7 +253,25 @@ void board::i_calc(int x, int y)
 
 	for (int i = 0; i <= 8; ++i)
 	{
-		neighbour = getNeighbour(x, y, i);
+		if (i == 4)
+			continue;
+
+		int newX, newY;
+		newX = x + neighbours[2 * i];
+		newY = y + neighbours[2 * i + 1];
+
+		if (newX < 0)
+			newX += m_size.x;
+		else if (newX >= m_size.x)
+			newX = 0;
+
+		if (newY < 0)
+			newY += m_size.y;
+		else if (newY >= m_size.y)
+			newY = 0;
+
+		neighbour = m_elements[newY * m_size.x + newX];
+
 		if (neighbour == 'x')
 			alive++;
 
@@ -273,7 +292,7 @@ void board::i_calc(int x, int y)
 		tmp_map[pos] = m_elements[pos];
 }
 
-char board::getNeighbour(int x, int y, int& number)
+/*char board::getNeighbour(int x, int y, int& number)
 {
 	switch (number)
 	{
@@ -311,7 +330,7 @@ char board::getNeighbour(int x, int y, int& number)
 		y = 0;
 
 	return m_elements[(y*m_size.x) + x];
-}
+}*/
 
 // list of error codes from "CL/cl.h"
 std::string board::cl_errorstring(cl_int err) {

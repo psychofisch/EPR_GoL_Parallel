@@ -1,48 +1,10 @@
-char getNeighbour(int x, int y, int size_x, int size_y, int number, __global char* map)
-{
-	switch (number)
-	{
-	case 0: x -= 1;
-		y -= 1;
-		break;
-	case 1: x -= 1;
-		break;
-	case 2: x -= 1;
-		y += 1;
-		break;
-	case 3: y -= 1;
-		break;
-	case 4: return '.'; //i only count living cells
-	case 5: y += 1;
-		break;
-	case 6: x += 1;
-		y -= 1;
-		break;
-	case 7: x += 1;
-		break;
-	case 8: x += 1;
-		y += 1;
-		break;
-	}
-
-	if (x < 0)
-		x += size_x;
-	else if (x >= size_x)
-		x = 0;
-
-	if (y < 0)
-		y += size_y;
-	else if (y >= size_y)
-		y = 0;
-
-	return map[(y * size_x) + x];
-}
-
 __kernel void cell(
 	__global char *elements,
 	__global char *tmp,
 	const int size_x,
-	const int size_y)
+	const int size_y//,
+	//__global int *neighbours
+)
 {
 	int tidX = get_global_id(0);
 	int tidY = get_global_id(1);
@@ -51,12 +13,42 @@ __kernel void cell(
 
 	if (tidX < size_x && tidY < size_y)
 	{
+		int neighbours[] = {
+			-1,-1,
+			-1,0,
+			-1,1,
+			0,-1,
+			0,0,
+			0,1,
+			1,-1,
+			1,0,
+			1,1
+		};
+
 		int pos = (tidY * size_x) + tidX;
 		alive = 0;
 
 		for (int i = 0; i <= 8; ++i)
 		{
-			neighbour = getNeighbour(tidX, tidY, size_x, size_y, i, elements);
+			if (i == 4)
+				continue;
+
+			int newX, newY;
+			newX = tidX + neighbours[2 * i];
+			newY = tidY + neighbours[2 * i + 1];
+
+			if (newX < 0)
+				newX += size_x;
+			else if (newX >= size_x)
+				newX = 0;
+
+			if (newY < 0)
+				newY += size_y;
+			else if (newY >= size_y)
+				newY = 0;
+
+			neighbour = elements[(newY * size_x) + newX];
+
 			if (neighbour == 'x')
 				++alive;
 

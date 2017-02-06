@@ -12,6 +12,18 @@ typedef unsigned int uint;
 #include "FileIO.h"
 #include "size.hpp"
 
+const int neighbours[] = { 
+	-1,-1,
+	-1,0,
+	-1,1,
+	0,-1,
+	0,0,
+	0,1,
+	1,-1,
+	1,0,
+	1,1
+};
+
 class board
 {
 public:
@@ -26,7 +38,7 @@ public:
 	void cycle_ocl(int cycles, OCLMODE mode, int platformId, int deviceId);
 	int getSizeX();
 	int getSizeY();
-	char getNeighbour(int x, int y, int& number);
+	//char getNeighbour(int x, int y, int& number);
 	void SaveBoard(const char* path);
 	void setDebug(bool d);
 
