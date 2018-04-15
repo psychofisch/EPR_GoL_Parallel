@@ -2,8 +2,7 @@ __kernel void cell(
 	__global char *elements,
 	__global char *tmp,
 	const int size_x,
-	const int size_y//,
-	//__global int *neighbours
+	const int size_y
 )
 {
 	int tidX = get_global_id(0);

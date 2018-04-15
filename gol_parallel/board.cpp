@@ -191,7 +191,7 @@ void board::cycle_ocl(int cycles, OCLMODE mode, int platformId, int deviceId)
 	{
 		if (pow(2, i) > m_size.x)
 		{
-			globalSize.x = pow(2, i);
+			globalSize.x = i*i;
 			break;
 		}
 	}
@@ -200,7 +200,7 @@ void board::cycle_ocl(int cycles, OCLMODE mode, int platformId, int deviceId)
 	{
 		if (pow(2, i) > m_size.y)
 		{
-			globalSize.y = pow(2, i);
+			globalSize.y = i*i;
 			break;
 		}
 	}
